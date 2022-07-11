@@ -46,7 +46,7 @@ class LVPRostersParser(object):
         yesterday_object = datetime_object - timedelta(days=1)
         yesterday = yesterday_object.strftime("%Y-%m-%d")
 
-        self.output += f"[[Data:News/{yesterday}|News Page to Edit]]\n\n"
+        self.output += f"[[Data:News/{yesterday}|News Page to Edit ({yesterday})]]\n\n"
 
     def get_saved_rosters_and_teams(self):
         with open(file="saved_rosters.json", mode="r+", encoding="utf8") as f:
