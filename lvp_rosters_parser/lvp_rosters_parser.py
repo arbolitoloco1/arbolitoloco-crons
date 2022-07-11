@@ -5,6 +5,7 @@ from mwrogue.esports_client import EsportsClient
 from mwrogue.auth_credentials import AuthCredentials
 
 from datetime import datetime
+from datetime import timedelta
 import pytz
 import time
 
@@ -41,6 +42,11 @@ class LVPRostersParser(object):
         day = str(datetime_object.day).zfill(2)
 
         self.date = f"{year}-{month}-{day}"
+
+        yesterday_object = datetime_object - timedelta(days=1)
+        yesterday = yesterday_object.strftime("%Y-%m-%d")
+
+        self.output += f"[[Data:News/{yesterday}|News Page to Edit]]\n\n"
 
     def get_saved_rosters_and_teams(self):
         with open(file="saved_rosters.json", mode="r+", encoding="utf8") as f:
@@ -155,7 +161,7 @@ class LVPRostersParser(object):
                                      summary=f"{datetime.now(self.pst_timezone)}")
                 if self.roster_differences:
                     self.site.save_title(title=f"User:Arbolitoloco/RostersLVP/{self.date}/Cambios",
-                                         text=str(self.roster_differences), 
+                                         text=str(self.roster_differences),
                                          summary=f"{datetime.now(self.pst_timezone)}")
                 if self.errors:
                     self.site.save_title(title=f"User:Arbolitoloco/RostersLVP/Errors", text=str("".join(self.errors)),
