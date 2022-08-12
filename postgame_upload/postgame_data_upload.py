@@ -1,6 +1,6 @@
 from mwrogue.esports_client import EsportsClient
 from mwrogue.auth_credentials import AuthCredentials
-from bayesapiwrapper.bayesapiwrapper import BayesApiWrapper
+from bayesapiwrapper import BayesApiWrapper
 import json
 
 
