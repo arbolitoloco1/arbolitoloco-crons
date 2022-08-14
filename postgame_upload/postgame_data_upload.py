@@ -44,8 +44,6 @@ class PostGameDataUpload(object):
                 try:
                     data, timeline = self.bayes_api_wrapper.get_game(game["RiotPlatformGameId"])
                 except Exception as e:
-                    print(f"Skipping {game['RiotPlatformGameId']}")
-                    print(e)
                     continue
                 try:
                     self.site.save_title(title=f"V5 data:{riot_platform_game_id}",
