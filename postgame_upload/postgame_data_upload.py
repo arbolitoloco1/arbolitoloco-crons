@@ -22,11 +22,11 @@ class PostGameDataUpload(object):
         self.bayes_api_wrapper = BayesApiWrapper()
 
     def run(self):
-        self.query_new_games()
-        self.process_new_games()
+        self.query_changed_games()
+        self.process_changed_games()
         self.report_errors()
 
-    def query_new_games(self):
+    def query_changed_games(self):
         self.changed_games = self.site.cargo_client.query(
             tables="MatchScheduleGame=MSG, PostgameJsonMetadata=PJM",
             where="MSG.RiotPlatformGameId IS NOT NULL AND MSG.HasRpgidInput = '1' AND (MSG.GameId != PJM.GameId "
@@ -42,7 +42,7 @@ class PostGameDataUpload(object):
                                              game['RiotPlatformGameId'].split("_")[1], "", game["GameId"],
                                              game["MatchId"], game["N GameInMatch"], game["OverviewPage"], game["Page"])
 
-    def process_new_games(self):
+    def process_changed_games(self):
         for game in self.changed_games:
             platform_game_id = game["RiotPlatformGameId"]
             spaced_platform_game_id = platform_game_id.replace("_", " ")
