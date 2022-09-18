@@ -69,8 +69,11 @@ class LVPRostersParser(object):
         for team in self.teams[web]:
             try:
                 self.output += f"=== {team} ===\n\nhttps://{web}.lvp.global{language}/equipo/{team}/\n\n"
-
+                
                 html = requests.get(f"https://{web}.lvp.global{language}/equipo/{team}/")
+                if html.status_code != 200:
+                    # Retry
+                    html = requests.get(f"https://{web}.lvp.global{language}/equipo/{team}/")
                 html = html.text
                 parsed_html = BeautifulSoup(html, "html.parser")
                 page = parsed_html.find("div", "squad-container-outer")
