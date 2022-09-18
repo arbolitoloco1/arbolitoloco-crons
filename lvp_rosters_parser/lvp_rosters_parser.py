@@ -27,6 +27,7 @@ class LVPRostersParser(object):
         self.current_rosters = {}
         self.teams = None
         self.roster_differences = ""
+        self.news_page_link = None
 
     def run(self):
         self.get_date()
@@ -46,7 +47,7 @@ class LVPRostersParser(object):
         yesterday_object = datetime_object - timedelta(days=1)
         yesterday = yesterday_object.strftime("%Y-%m-%d")
 
-        self.output += f"[[Data:News/{yesterday}|News Page to Edit ({yesterday})]]\n\n"
+        self.news_page_link = f"[[Data:News/{yesterday}|News Page to Edit ({yesterday})]]\n\n"
 
     def get_saved_rosters_and_teams(self):
         with open(file="saved_rosters.json", mode="r+", encoding="utf8") as f:
@@ -157,7 +158,8 @@ class LVPRostersParser(object):
             try:
                 self.site.save_title(title=f"User:Arbolitoloco/RostersLVP", text=str(self.output),
                                      summary=f"{datetime.now(self.pst_timezone)}")
-                self.site.save_title(title=f"User:Arbolitoloco/RostersLVP/{self.date}", text=str(self.output),
+                self.site.save_title(title=f"User:Arbolitoloco/RostersLVP/{self.date}",
+                                     text=self.news_page_link + str(self.output),
                                      summary=f"{datetime.now(self.pst_timezone)}")
                 if self.roster_differences:
                     self.site.save_title(title=f"User:Arbolitoloco/RostersLVP/{self.date}/Cambios",
