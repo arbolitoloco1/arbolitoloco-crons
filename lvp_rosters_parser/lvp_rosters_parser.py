@@ -16,6 +16,8 @@ import get_roster_differences
 class LVPRostersParser(object):
     LOLESPORTS_ENDPOINT = "https://esports-api.lolesports.com/persisted/gw/getTeams?hl=es-MX&id={}"
     LOLESPORTS_HEADERS = {"x-api-key": "0TvQnueqKa5mxJntVWt0w4LpLfEkrV1Ta8rQBb9Z"}
+    PAGE_LOCALES = {"ligamaster": "/ar", "ligadehonor": "/cl", "golden": "/co", "volcano": "/ec", "stars": "/pe",
+                    "ddh": "/mx", "elements": "", "superliga": ""}
 
     def __init__(self, site, pst_timezone):
         self.site = site
@@ -61,19 +63,16 @@ class LVPRostersParser(object):
         self.current_rosters[team]["players"][player["nick"]] = player
 
     def parse_lvp(self, web):
-        languages_dict = {"ligamaster": "/ar", "ligadehonor": "/cl", "golden": "/co", "volcano": "/ec", "stars": "/pe",
-                          "ddh": "/mx", "elements": "", "superliga": ""}
-
         self.output += f"== {web} ==\n\n"
-        language = languages_dict[web]
+        locale = self.PAGE_LOCALES[web]
         for team in self.teams[web]:
             try:
-                self.output += f"=== {team} ===\n\nhttps://{web}.lvp.global{language}/equipo/{team}/\n\n"
-                
-                html = requests.get(f"https://{web}.lvp.global{language}/equipo/{team}/")
+                self.output += f"=== {team} ===\n\nhttps://{web}.lvp.global{locale}/equipo/{team}/\n\n"
+
+                html = requests.get(f"https://{web}.lvp.global{locale}/equipo/{team}/")
                 if html.status_code != 200:
                     # Retry
-                    html = requests.get(f"https://{web}.lvp.global{language}/equipo/{team}/")
+                    html = requests.get(f"https://{web}.lvp.global{locale}/equipo/{team}/")
                 html = html.text
                 parsed_html = BeautifulSoup(html, "html.parser")
                 page = parsed_html.find("div", "squad-container-outer")
