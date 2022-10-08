@@ -18,6 +18,7 @@ class PostGameDataUpload(object):
 |OverviewPage={}
 |DataPage={}
 }}}}"""
+    RIOT_LIVE_PLATFORMS = ["BR1", "EUN1", "EUW1", "JP1", "KR", "LA1", "LA2", "NA1", "OC1", "TR1", "RU"]
 
     def __init__(self, site: EsportsClient):
         self.site = site
@@ -56,9 +57,11 @@ class PostGameDataUpload(object):
             data, timeline = self.bayes_api_wrapper.get_game(platform_game_id)
         except NotFoundError:
             try:
-                region = platform_game_id.split("_")[0]
-                data = self.lol_watcher.match.by_id(region, platform_game_id)
-                timeline = self.lol_watcher.match.timeline_by_match(region, platform_game_id)
+                platform = platform_game_id.split("_")[0]
+                if platform not in self.RIOT_LIVE_PLATFORMS:
+                    return None, None
+                data = self.lol_watcher.match.by_id(platform, platform_game_id)
+                timeline = self.lol_watcher.match.timeline_by_match(platform, platform_game_id)
             except ApiError:
                 return None, None
         return json.dumps(data), json.dumps(timeline)
