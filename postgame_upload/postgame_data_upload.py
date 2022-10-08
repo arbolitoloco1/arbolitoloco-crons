@@ -1,9 +1,8 @@
 from mwrogue.esports_client import EsportsClient
 from mwrogue.auth_credentials import AuthCredentials
-from bayesapiwrapper.bayesapiwrapper import BayesApiWrapper, NotFoundError
+from bayesapiwrapper.bayesapiwrapper import BayesApiWrapper
 import json
 from riotwatcher import LolWatcher, ApiError
-import dotenv
 import os
 from dotenv import load_dotenv
 
