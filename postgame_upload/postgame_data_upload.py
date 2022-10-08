@@ -81,6 +81,7 @@ class PostGameDataUpload(object):
                 self.upload_game_data(spaced_platform_game_id, data, timeline)
             metadata_text = self.get_metadata_text(game)
             self.upload_game_metadata(spaced_platform_game_id, metadata_text)
+            self.purge_overview_page(game["OverviewPage"])
 
     def upload_game_data(self, platform_game_id, data, timeline):
         try:
@@ -96,6 +97,11 @@ class PostGameDataUpload(object):
         except Exception as e:
             self.site.log_error_content(f"V5 data:{platform_game_id}/Timeline",
                                         f"Data or timeline page could not be saved! {e}")
+
+    def purge_overview_page(self, page_title):
+        page = self.site.client.pages[page_title]
+        if page.exists:
+            page.purge()
 
     def upload_game_metadata(self, platform_game_id, metadata_text):
         try:
