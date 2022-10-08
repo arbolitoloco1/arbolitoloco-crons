@@ -1,6 +1,6 @@
 from mwrogue.esports_client import EsportsClient
 from mwrogue.auth_credentials import AuthCredentials
-from bayesapiwrapper.bayesapiwrapper import BayesApiWrapper
+from bayesapiwrapper.bayesapiwrapper import BayesApiWrapper, NotFoundError
 import json
 from riotwatcher import LolWatcher, ApiError
 import os
@@ -54,12 +54,12 @@ class PostGameDataUpload(object):
     def get_game_data(self, platform_game_id):
         try:
             data, timeline = self.bayes_api_wrapper.get_game(platform_game_id)
-        except:
+        except NotFoundError:
             try:
                 region = platform_game_id.split("_")[0]
                 data = self.lol_watcher.match.by_id(region, platform_game_id)
                 timeline = self.lol_watcher.match.timeline_by_match(region, platform_game_id)
-            except:
+            except ApiError:
                 return None, None
         return json.dumps(data), json.dumps(timeline)
 
@@ -68,7 +68,11 @@ class PostGameDataUpload(object):
             platform_game_id = game["RiotPlatformGameId"]
             spaced_platform_game_id = platform_game_id.replace("_", " ")
             if not self.site.client.pages[f"V5 data:{spaced_platform_game_id}"].exists:
-                data, timeline = self.get_game_data(platform_game_id)
+                try:
+                    data, timeline = self.get_game_data(platform_game_id)
+                except Exception as e:
+                    self.site.log_error_script(error=e)
+                    continue
                 if data is None and timeline is None:
                     continue
                 self.upload_game_data(spaced_platform_game_id, data, timeline)
@@ -79,24 +83,24 @@ class PostGameDataUpload(object):
         try:
             self.site.save_title(title=f"V5 data:{platform_game_id}",
                                  text=data)
-        except:
+        except Exception as e:
             self.site.log_error_content(f"V5 data:{platform_game_id}",
-                                        f"Data or timeline page could not be saved!")
+                                        f"Data or timeline page could not be saved! {e}")
 
         try:
             self.site.save_title(title=f"V5 data:{platform_game_id}/Timeline",
                                  text=timeline)
-        except:
+        except Exception as e:
             self.site.log_error_content(f"V5 data:{platform_game_id}/Timeline",
-                                        f"Data or timeline page could not be saved!")
+                                        f"Data or timeline page could not be saved! {e}")
 
     def upload_game_metadata(self, platform_game_id, metadata_text):
         try:
             self.site.save_title(title=f"V5 metadata:{platform_game_id}",
                                  text=metadata_text)
-        except:
+        except Exception as e:
             self.site.log_error_content(f"V5 metadata:{platform_game_id}",
-                                        f"Metadata page could not be saved!")
+                                        f"Metadata page could not be saved! {e}")
 
     def report_errors(self):
         self.site.report_all_errors("PostGameData")
@@ -104,5 +108,5 @@ class PostGameDataUpload(object):
 
 if __name__ == "__main__":
     credentials = AuthCredentials(user_file="bot")
-    site = EsportsClient("lol", credentials=credentials)
-    PostGameDataUpload(site).run()
+    lol_site = EsportsClient("lol", credentials=credentials)
+    PostGameDataUpload(lol_site).run()
