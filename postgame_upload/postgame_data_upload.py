@@ -54,7 +54,7 @@ class PostGameDataUpload(object):
     def get_game_data(self, platform_game_id):
         try:
             data, timeline = self.bayes_api_wrapper.get_game(platform_game_id)
-        except NotFoundError:
+        except:
             try:
                 region = platform_game_id.split("_")[0]
                 data = self.lol_watcher.match.by_id(region, platform_game_id)
