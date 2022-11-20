@@ -97,11 +97,12 @@ class LVPRostersParser(object):
                 for player in players:
                     player_info = player.find("div", "upper-player-info-container")
                     player_nick = player_info.find("span", "player-nickname").text
-                    player_position = player_info.find("span", "player-position").text
+                    player_position = player_info.find("span", "player-position").text or "??"
                     player_flag_url = player_info.find("img", "flag-image")["src"]
-                    player_flag = "--"
+                    player_flag = "??"
                     if player_flag_url:
                         player_flag = player_flag_url.split("/")[-1].replace(".png", "")
+                    player_name = player_info.find("span", "player-name").text or "??"
 
                     if not player_nick:
                         raise Exception(f"Information for a player could not be found")
@@ -110,7 +111,7 @@ class LVPRostersParser(object):
 
                     self.add_player_to_team({"nick": player_nick, "position": player_position, "order": i}, team)
 
-                    self.output += f"{player_nick} - {player_position} - {player_flag}\n\n"
+                    self.output += f"{player_nick} - {player_position} - {player_name} - {player_flag}\n\n"
 
                 self.output += "\n"
             except Exception as e:
