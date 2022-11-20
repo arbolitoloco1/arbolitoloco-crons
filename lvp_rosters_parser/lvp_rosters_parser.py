@@ -8,6 +8,7 @@ from datetime import datetime
 from datetime import timedelta
 import pytz
 import time
+import os
 
 import json
 import get_roster_differences
@@ -52,6 +53,9 @@ class LVPRostersParser(object):
         self.news_page_link = f"[[Data:News/{yesterday}|News Page to Edit ({yesterday})]]\n\n"
 
     def get_saved_rosters_and_teams(self):
+        if not os.path.isfile("saved_rosters.json"):
+            with open(file="saved_rosters.json", mode="w+", encoding="utf8") as f:
+                json.dump({}, f, ensure_ascii=False)
         with open(file="saved_rosters.json", mode="r+", encoding="utf8") as f:
             self.saved_rosters = json.load(f)
         with open(file="teams.json", mode="r+", encoding="utf8") as f:
@@ -94,6 +98,10 @@ class LVPRostersParser(object):
                     player_info = player.find("div", "upper-player-info-container")
                     player_nick = player_info.find("span", "player-nickname").text
                     player_position = player_info.find("span", "player-position").text
+                    player_flag_url = player_info.find("img", "flag-image")["src"]
+                    player_flag = "--"
+                    if player_flag_url:
+                        player_flag = player_flag_url.split("/")[-1].replace(".png", "")
 
                     if not player_nick:
                         raise Exception(f"Information for a player could not be found")
@@ -102,7 +110,7 @@ class LVPRostersParser(object):
 
                     self.add_player_to_team({"nick": player_nick, "position": player_position, "order": i}, team)
 
-                    self.output += f"{player_nick} - {player_position}\n\n"
+                    self.output += f"{player_nick} - {player_position} - {player_flag}\n\n"
 
                 self.output += "\n"
             except Exception as e:
