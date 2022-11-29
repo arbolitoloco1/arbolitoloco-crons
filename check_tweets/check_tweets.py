@@ -38,8 +38,7 @@ def main():
             link = source[0]
             if source[2] != "twitter.com":
                 continue
-
-            tweet_id = re.search(r"status/([0-9]+)", link)[1]
+            tweet_id = re.search(r"status/([0-9]+)", link).group(1)
             if not tweet_id:
                 site.log_error_content("Can't get tweet id", text="Link: {0}".format(link))
                 continue
