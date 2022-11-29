@@ -17,6 +17,8 @@ TWEET_NOT_FOUND_ERROR = "Not Found Error"
 def main():
     twitter_client = tweepy.Client(os.environ.get('TWITTER_BEARER_TOKEN'))
 
+    checked_links = []
+
     credentials = AuthCredentials(user_file="me")
     site = EsportsClient("lol", credentials=credentials)
 
@@ -36,11 +38,14 @@ def main():
                 continue
             source = source_string.split(";;;")
             link = source[0]
+            if link in checked_links:
+                continue
+            checked_links.append(link)
             if source[2] != "twitter.com":
                 continue
             link_re_match = re.search(r"status/([0-9]+)", link)
             if not link_re_match:
-                site.log_error_content("Can't get tweet id", text=f"Link: {link}")
+                site.log_error_content(text=f"Can't get tweet id! Link: {link}")
                 continue
             tweet_id = link_re_match[1]
             try:
@@ -55,9 +60,12 @@ def main():
                 site.log_error_content(f"{data_page}",
                                        text=f"Tweet not found! Link: {link} - Line {line_in_date}")
             else:
-                site.log_error_content("Failure trying to get tweet",
-                                       text="Other error! Link: {}, Status Id: {}, Error title: {}".format(
-                                           str(link), str(tweet_id), str(r.errors[0]["title"])))
+                site.log_error_content(text="Failure trying to get tweet! "
+                                            "Link: {}, Status Id: {}, Error title: {}".format(str(link),
+                                                                                              str(tweet_id),
+                                                                                              str(r.errors[0]["title"])
+                                                                                              )
+                                       )
 
     site.report_all_errors("Deleted Tweets")
 
