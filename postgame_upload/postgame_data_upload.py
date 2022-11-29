@@ -24,7 +24,6 @@ class PostGameDataUpload(object):
         self.changed_games = None
         self.bayes_api_wrapper = BayesApiWrapper()
         self.lol_watcher = LolWatcher(os.getenv('RIOT_API_KEY'))
-        self.lol_watcher = None
         self.saved_games = []
 
     def run(self):
@@ -56,6 +55,8 @@ class PostGameDataUpload(object):
                 platform = platform_game_id.split("_")[0]
                 if platform not in self.RIOT_LIVE_PLATFORMS:
                     return None, None
+                print(platform)
+                print(platform_game_id)
                 data = self.lol_watcher.match.by_id(platform, platform_game_id)
                 timeline = self.lol_watcher.match.timeline_by_match(platform, platform_game_id)
             except ApiError:
