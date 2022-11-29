@@ -4,7 +4,6 @@ from bayesapiwrapper import BayesApiWrapper, NotFoundError
 import json
 from riotwatcher import LolWatcher, ApiError
 import os
-from dotenv import load_dotenv
 
 
 class PostGameDataUpload(object):
@@ -24,17 +23,14 @@ class PostGameDataUpload(object):
         self.site = site
         self.changed_games = None
         self.bayes_api_wrapper = BayesApiWrapper()
+        self.lol_watcher = LolWatcher(os.getenv('RIOT_API_KEY'))
         self.lol_watcher = None
+        self.saved_games = []
 
     def run(self):
-        self.load_lol_watcher()
         self.query_changed_games()
         self.process_changed_games()
         self.report_errors()
-
-    def load_lol_watcher(self):
-        load_dotenv()
-        self.lol_watcher = LolWatcher(os.getenv('RIOT_API_KEY'))
 
     def query_changed_games(self):
         self.changed_games = self.site.cargo_client.query(
@@ -69,6 +65,8 @@ class PostGameDataUpload(object):
     def process_changed_games(self):
         for game in self.changed_games:
             platform_game_id = game["RiotPlatformGameId"]
+            if platform_game_id in self.saved_games:
+                self.site.log_error_content(text=f"{platform_game_id} is duplicated in {game['Page']}")
             spaced_platform_game_id = platform_game_id.replace("_", " ")
             if not self.site.client.pages[f"V5 data:{spaced_platform_game_id}"].exists:
                 try:
@@ -82,6 +80,7 @@ class PostGameDataUpload(object):
             metadata_text = self.get_metadata_text(game)
             self.upload_game_metadata(spaced_platform_game_id, metadata_text)
             self.purge_overview_page(game["OverviewPage"])
+            self.saved_games.append(platform_game_id)
 
     def upload_game_data(self, platform_game_id, data, timeline):
         try:
