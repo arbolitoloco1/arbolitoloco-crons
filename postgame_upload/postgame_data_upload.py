@@ -55,8 +55,6 @@ class PostGameDataUpload(object):
                 platform = platform_game_id.split("_")[0]
                 if platform not in self.RIOT_LIVE_PLATFORMS:
                     return None, None
-                print(platform)
-                print(platform_game_id)
                 data = self.lol_watcher.match.by_id(platform, platform_game_id)
                 timeline = self.lol_watcher.match.timeline_by_match(platform, platform_game_id)
             except ApiError:
