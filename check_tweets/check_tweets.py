@@ -23,7 +23,7 @@ def main():
     response = site.cargo_client.query(
         tables="NewsItems=NI",
         fields="NI.Source, NI._pageName=pageName, NI.N_LineInDate",
-        where='NI.Source IS NOT NULL AND NI.Date_Sort >= "{}"'.format(check_from_date),
+        where=f'NI.Source IS NOT NULL AND NI.Date_Sort >= "{check_from_date}"',
         order_by="NI.Date_Sort DESC"
     )
 
@@ -38,10 +38,11 @@ def main():
             link = source[0]
             if source[2] != "twitter.com":
                 continue
-            tweet_id = re.search(r"status/([0-9]+)", link).group(1)
-            if not tweet_id:
-                site.log_error_content("Can't get tweet id", text="Link: {0}".format(link))
+            link_re_match = re.search(r"status/([0-9]+)", link)
+            if not link_re_match:
+                site.log_error_content("Can't get tweet id", text=f"Link: {link}")
                 continue
+            tweet_id = link_re_match[1]
             try:
                 r = twitter_client.get_tweet(tweet_id, user_auth=False)
             except TooManyRequests:
@@ -55,7 +56,7 @@ def main():
                                        text=f"Tweet not found! Link: {link} - Line {line_in_date}")
             else:
                 site.log_error_content("Failure trying to get tweet",
-                                       text="Other error! Link: {0}, Status Id: {1}, Error title: {2}".format(
+                                       text="Other error! Link: {}, Status Id: {}, Error title: {}".format(
                                            str(link), str(tweet_id), str(r.errors[0]["title"])))
 
     site.report_all_errors("Deleted Tweets")
