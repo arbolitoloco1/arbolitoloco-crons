@@ -143,9 +143,9 @@ class Retweet(object):
     @staticmethod
     def check_tweet_mentions(tweet):
         if not tweet.entities:
-            return
+            return False
         if "mentions" not in tweet.entities:
-            return
+            return False
         modified_tweet_text = tweet.text
         mentions_alfajor = False
         for mention in tweet.entities["mentions"]:
@@ -157,12 +157,12 @@ class Retweet(object):
             ) or "alfajores" in unidecode(mention["username"].lower()):
                 mentions_alfajor = True
         if not mentions_alfajor:
-            return
+            return False
         if (
             "alfajor" in modified_tweet_text.lower()
             or "alfajores" in modified_tweet_text.lower()
         ):
-            return
+            return False
         return True
 
     @backoff.on_exception(backoff.expo, TooManyRequests, max_time=240)
