@@ -19,7 +19,7 @@ def main():
 
     checked_links = []
 
-    credentials = AuthCredentials(user_file="me")
+    credentials = AuthCredentials(user_file="bot")
     site = EsportsClient("lol", credentials=credentials)
 
     response = site.cargo_client.query(
