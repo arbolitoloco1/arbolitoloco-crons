@@ -1,6 +1,7 @@
 from mwrogue.esports_client import EsportsClient
 from mwrogue.auth_credentials import AuthCredentials
-from bayesapiwrapper import BayesApiWrapper, NotFoundError
+from bayes_lol_client import BayesEMH
+from bayes_lol_client.errors import NotFoundError
 import json
 from riotwatcher import LolWatcher, ApiError
 import os
@@ -22,7 +23,7 @@ class PostGameDataUpload(object):
     def __init__(self, site: EsportsClient):
         self.site = site
         self.changed_games = None
-        self.bayes_api_wrapper = BayesApiWrapper()
+        self.emh = BayesEMH()
         self.lol_watcher = LolWatcher(os.environ.get('RIOT_API_KEY'))
 
     def run(self):
@@ -48,7 +49,7 @@ class PostGameDataUpload(object):
 
     def get_game_data(self, platform_game_id):
         try:
-            data, timeline = self.bayes_api_wrapper.get_game(platform_game_id)
+            data, timeline = self.emh.get_game_data(platform_game_id)
         except NotFoundError:
             try:
                 platform = platform_game_id.split("_")[0]
