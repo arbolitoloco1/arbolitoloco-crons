@@ -19,6 +19,7 @@ class PostGameDataUpload(object):
 |DataPage={}
 }}}}"""
     RIOT_LIVE_PLATFORMS = ["BR1", "EUN1", "EUW1", "JP1", "KR", "LA1", "LA2", "NA1", "OC1", "TR1", "RU"]
+    IGNORED_PLATFORMS = ["VN"]
 
     def __init__(self, site: EsportsClient):
         self.site = site
@@ -48,13 +49,14 @@ class PostGameDataUpload(object):
                                              game["MatchId"], game["N GameInMatch"], game["OverviewPage"], game["Page"])
 
     def get_game_data(self, platform_game_id):
-        try:
-            data, timeline = self.emh.get_game_data(platform_game_id)
-        except NotFoundError:
+        platform = platform_game_id.split("_")[0]
+        if platform not in self.RIOT_LIVE_PLATFORMS:
             try:
-                platform = platform_game_id.split("_")[0]
-                if platform not in self.RIOT_LIVE_PLATFORMS:
-                    return None, None
+                data, timeline = self.emh.get_game_data(platform_game_id)
+            except NotFoundError:
+                return None, None
+        else:
+            try:
                 data = self.lol_watcher.match.by_id(platform, platform_game_id)
                 timeline = self.lol_watcher.match.timeline_by_match(platform, platform_game_id)
             except ApiError:
@@ -65,6 +67,9 @@ class PostGameDataUpload(object):
         for game in self.changed_games:
             platform_game_id = game["RiotPlatformGameId"]
             spaced_platform_game_id = platform_game_id.replace("_", " ")
+            platform = platform_game_id.split("_")[0]
+            if platform in self.IGNORED_PLATFORMS:
+                continue
             if not self.site.client.pages[f"V5 data:{spaced_platform_game_id}"].exists:
                 try:
                     data, timeline = self.get_game_data(platform_game_id)
